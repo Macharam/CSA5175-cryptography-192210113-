@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <ctype.h>  
+#include <string.h>
+int modInverse(int a, int m) {
+    for (int x = 1; x < m; x++) {
+        if ((a * x) % m == 1) {
+            return x;
+        }
+    }
+    return -1; 
+}
+void decryptAffineCipher(const char *ciphertext, char *plaintext, int a, int b) {
+    int a_inv = modInverse(a, 26); 
+    if (a_inv == -1) {
+        printf("Error: a (%d) has no modular inverse under modulo 26.\n", a);
+        return;
+    }
+    for (int i = 0; ciphertext[i] != '\0'; i++) {
+        char ch = ciphertext[i];
+        if (isalpha(ch)) {  
+            int C = toupper(ch) - 'A'; 
+            int P = (a_inv * (C - b + 26)) % 26; 
+            plaintext[i] = (islower(ch) ? 'a' : 'A') + P; 
+        } else {
+            plaintext[i] = ch;
+        }
+    }
+    plaintext[strlen(ciphertext)] = '\0'; 
+}
+int main() {
+    char ciphertext[] = "BU UB UB UB";
+    char plaintext[100];
+    int P1 = 'E' - 'A'; 
+    int C1 = 'B' - 'A'; 
+    int P2 = 'T' - 'A'; 
+    int C2 = 'U' - 'A'; 
+    int a, b;
+    for (a = 1; a < 26; a++) {
+        if ((15 * a) % 26 == (C2 - C1 + 26) % 26) {
+            b = (C1 - P1 * a + 26) % 26;          
+            break;
+        }
+    }
+    if (modInverse(a, 26) == -1) {
+        printf("Error: The value of a = %d does not have a modular inverse under modulo 26.\n", a);
+        return 1;
+    }
+    decryptAffineCipher(ciphertext, plaintext, a, b);
+    printf("Ciphertext: %s\n", ciphertext);
+    printf("Decrypted Plaintext: %s\n", plaintext);
+    printf("Affine Cipher Parameters: a = %d, b = %d\n", a, b);
+    return 0;
+}
