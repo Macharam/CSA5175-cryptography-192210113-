@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <string.h>
+int mod26(int n) {
+    return (n % 26 + 26) % 26;
+}
+void encrypt(char *plaintext, int key[2][2], char *ciphertext) {
+    int i, len = strlen(plaintext);
+    for (i = 0; i < len; i += 2) {
+        int x1 = plaintext[i] - 'a';
+        int x2 = (i + 1 < len) ? plaintext[i + 1] - 'a' : 'x' - 'a'; 
+        ciphertext[i] = mod26(key[0][0] * x1 + key[0][1] * x2) + 'a';
+        ciphertext[i + 1] = mod26(key[1][0] * x1 + key[1][1] * x2) + 'a';
+    }
+    ciphertext[len] = '\0'; 
+}
+void decrypt(char *ciphertext, int invKey[2][2], char *plaintext) {
+    int i, len = strlen(ciphertext);
+    for (i = 0; i < len; i += 2) {
+        int y1 = ciphertext[i] - 'a';
+        int y2 = ciphertext[i + 1] - 'a';
+        plaintext[i] = mod26(invKey[0][0] * y1 + invKey[0][1] * y2) + 'a';
+        plaintext[i + 1] = mod26(invKey[1][0] * y1 + invKey[1][1] * y2) + 'a';
+    }
+    plaintext[len] = '\0'; 
+}
+int main() {
+    char plaintext[] = "meetmeattheusualplaceattenratherthaneightoclock";
+    char ciphertext[100], decrypted[100];
+    int key[2][2] = { {9, 4}, {5, 7} };
+    int invKey[2][2] = { {7, 22}, {21, 9} }; 
+    printf("Plaintext: %s\n", plaintext);
+    encrypt(plaintext, key, ciphertext);
+    printf("Ciphertext: %s\n", ciphertext);
+    decrypt(ciphertext, invKey, decrypted);
+    printf("Decrypted text: %s\n", decrypted);
+    return 0;
+}
