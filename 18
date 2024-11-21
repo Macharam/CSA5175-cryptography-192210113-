@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <string.h>
+
+#define DES_KEY_SIZE 8 // Key size in bytes
+#define NUM_ROUNDS 16  // Number of rounds in DES
+#define SUBKEY_SIZE 6  // Each subkey is 6 bytes (48 bits)
+
+// Function prototypes
+void generate_custom_key_schedule(unsigned char *key, unsigned char subkeys[NUM_ROUNDS][SUBKEY_SIZE]);
+void print_subkeys(unsigned char subkeys[NUM_ROUNDS][SUBKEY_SIZE]);
+
+int main() {
+    unsigned char key[DES_KEY_SIZE] = {0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC, 0xDF, 0xF1}; // Example key
+    unsigned char subkeys[NUM_ROUNDS][SUBKEY_SIZE];
+
+    // Generate the custom key schedule
+    generate_custom_key_schedule(key, subkeys);
+
+    // Print the generated subkeys
+    print_subkeys(subkeys);
+
+    return 0;
+}
+
+// Function to generate the custom key schedule
+void generate_custom_key_schedule(unsigned char *key, unsigned char subkeys[NUM_ROUNDS][SUBKEY_SIZE]) {
+    // Step 1: Initial Permutation (for demonstration, this is simplified)
+    // Assume key is already in the correct format for our custom selection
+
+    // Step 2: Split the key into two halves (28 bits each)
+    unsigned char left[4] = {key[0], key[1], key[2], key[3]}; // First 28 bits
+    unsigned char right[4] = {key[4], key[5], key[6], key[7]}; // Last 28 bits
+
+    // Step 3: Generate subkeys
+    for (int round = 0; round < NUM_ROUNDS; round++) {
+        // For this example, let's assume we are doing a simple rotation
+        // and selecting bits for the subkeys.
+
+        // Rotate left halves (simplified example)
+        if (round % 2 == 0) {
+            // Rotate left
+            unsigned char temp = left[0];
+            left[0] = left[1];
+            left[1] = left[2];
+            left[2] = left[3];
+            left[3] = temp;
+        } else {
+            // Rotate right
+            unsigned char temp = right[3];
+            right[3] = right[2];
+            right[2] = right[1];
+            right[1] = right[0];
+            right[0] = temp;
+        }
+
+        // Step 4: Create the subkey
+        // First 24 bits from left (3 bytes) and second 24 bits from right (3 bytes)
+        memcpy(subkeys[round], left, 3); // First 24 bits (3 bytes)
+        memcpy(subkeys[round] + 3, right, 3); // Second 24 bits (3 bytes)
+    }
+}
+
+// Function to print the generated subkeys
+void print_subkeys(unsigned char subkeys[NUM_ROUNDS][SUBKEY_SIZE]) {
+    for (int round = 0; round < NUM_ROUNDS; round++) {
+        printf("Subkey K%d: ", round + 1);
+        for (int i = 0; i < SUBKEY_SIZE; i++) {
+            printf("%02X ", subkeys[round][i]);
+        }
+        printf("\n");
+    }
+}
